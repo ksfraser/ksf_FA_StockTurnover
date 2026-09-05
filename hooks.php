@@ -3,28 +3,29 @@ declare(strict_types=1);
 
 define('SS_ksf_FA_StockTurnover', 148 << 8);
 
-$composerDepsPath = dirname(__DIR__) . '/ksf_FA_Common/src/Utils/ComposerDependencies.php';
-if (file_exists($composerDepsPath)) {
-    require_once $composerDepsPath;
-    \ksfraser\FrontAccounting\Common\Utils\ComposerDependencies::ensure(__DIR__);
-}
-
 class hooks_ksf_FA_StockTurnover extends hooks
 {
     var $module_name = 'ksf_FA_StockTurnover';
     var $version = '2.4.19-1.0.0';
 
-    function install_extension($company, $force = false)
+    function install_extension($check_only=true)
     {
-        parent::install_extension($company, $force);
+        if (!$check_only) {
+            $this->_ensureComposerDependencies();
+        }
+        return true;
+    }
 
-        $this->_ensureComposerDependencies();
+    function activate_extension($company, $check_only=true)
+    {
+        if ($check_only) {
+            return true;
+        }
 
         $autoload = __DIR__ . '/vendor/autoload.php';
-        if (!file_exists($autoload)) {
-            return false;
+        if (file_exists($autoload)) {
+            require_once $autoload;
         }
-        require_once $autoload;
 
         $sqlFile = __DIR__ . '/sql/install.sql';
         if (file_exists($sqlFile)) {
@@ -33,18 +34,16 @@ class hooks_ksf_FA_StockTurnover extends hooks
             run_db_import($sql, $company);
         }
 
-        return true;
-    }
-
-    function activate_extension($company, $force = false)
-    {
-        $this->install_extension($company, $force);
         add_security_section(SS_ksf_FA_StockTurnover, 'Stock Turnover', 'SA_INVENTORY');
         return true;
     }
 
-    function deactivate_extension($company, $force = false)
+    function deactivate_extension($company, $check_only=true)
     {
+        if ($check_only) {
+            return true;
+        }
+
         $uninstallFile = __DIR__ . '/sql/uninstall.sql';
         if (file_exists($uninstallFile)) {
             $sql = file_get_contents($uninstallFile);
@@ -52,7 +51,7 @@ class hooks_ksf_FA_StockTurnover extends hooks
         }
 
         remove_security_section(SS_ksf_FA_StockTurnover);
-        return parent::deactivate_extension($company, $force);
+        return true;
     }
 
     function getModuleConstants(&$data, $opts = [])
