@@ -7,11 +7,8 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
 
-$composerDepsPath = __DIR__ . '/vendor/ksfraser/ksf-common-db/src/Utils/ComposerDependencies.php';
-if (file_exists($composerDepsPath)) {
-    require_once $composerDepsPath;
-    \ksfraser\FrontAccounting\Common\Utils\ComposerDependencies::ensure(__DIR__);
-}
+require_once __DIR__ . '/ComposerDependencies.php';
+\ksfraser\FrontAccounting\Common\Utils\ComposerDependencies::ensure(__DIR__);
 
 class hooks_ksf_FA_StockTurnover extends hooks
 {
