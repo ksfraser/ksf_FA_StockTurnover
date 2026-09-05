@@ -158,6 +158,40 @@ output.
 - Cross-module services: `ksf_log()` (ksf_FA_Common) routes to `ksf_log` hook →
   writes `company/<n>/logs/<module>_<date>.log`.
 
+### Event-Driven Architecture
+
+**Every CRUD action that affects cross-module state MUST emit an event.** See
+`ProjectDcs/Event-Driven Architecture.md` for full event taxonomy, payload schemas,
+and workflow diagrams.
+
+**Core principle:** Modules communicate through events, not direct calls. A module
+emits without knowing listeners; a listener acts without knowing the emitter.
+
+**Event naming:** `{object}_{action}` in snake_case (e.g., `stock_reserved`,
+`suggested_po_created`, `po_created`).
+
+**Standard payload:**
+```php
+$data = [
+    'module'    => 'ksf_FA_StockReservations',
+    'event'     => 'stock_reserved',
+    'timestamp' => '2024-01-15 14:30:00',
+    // ... event-specific fields
+];
+```
+
+**Emitter rules:**
+- Emit via `hook_invoke_all('{event}', $data)` after state is committed
+- Include all standard fields (module, event, timestamp)
+- Include relevant IDs for listeners (so_order_no, po_number, etc.)
+- Emit even if no listeners (fire-and-forget)
+
+**Listener rules:**
+- Implement method named `{event_name}(array &$data)`
+- Check team type is enabled before acting (for Teams module)
+- Use `class_exists()` guard before using other modules' classes
+- Log errors, don't throw (hook methods must be fault-tolerant)
+
 ## 12. FA module packaging
 
 - `_init/config` file is **gzip-compressed** `Key: Value` lines (`Name:`, `Version:`,
