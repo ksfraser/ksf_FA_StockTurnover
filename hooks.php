@@ -132,7 +132,8 @@ class hooks_ksf_FA_StockTurnover extends hooks
 
     private function recordStockMovement($cart, $trans_type): void
     {
-        if (!class_exists('\Ksfraser\FrontAccounting\StockTurnover\StockMovementRecorder::class)) {
+        $recorderClass = 'Ksfraser\\FrontAccounting\\StockTurnover\\StockMovementRecorder';
+        if (!class_exists($recorderClass)) {
             return;
         }
 
@@ -151,13 +152,15 @@ class hooks_ksf_FA_StockTurnover extends hooks
             return $handler;
         }
 
-        if (!class_exists('\Ksfraser\FrontAccounting\StockTurnover\StockTurnoverHandler')) {
+        $handlerClass = 'Ksfraser\\FrontAccounting\\StockTurnover\\StockTurnoverHandler';
+        if (!class_exists($handlerClass)) {
             return null;
         }
 
         $db = new \ksfraser\CommonDb\Adapter\FaDbAdapter(TB_PREF);
-        $repository = new \Ksfraser\FrontAccounting\StockTurnover\TurnoverRepository($db);
-        $handler = new \Ksfraser\FrontAccounting\StockTurnover\StockTurnoverHandler($repository);
+        $repoClass = 'Ksfraser\\FrontAccounting\\StockTurnover\\TurnoverRepository';
+        $repository = new $repoClass($db);
+        $handler = new $handlerClass($repository);
 
         return $handler;
     }
