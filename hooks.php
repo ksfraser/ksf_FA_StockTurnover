@@ -7,7 +7,7 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
 
-$composerDepsPath = dirname(__DIR__) . '/ksf_FA_Common/src/Utils/ComposerDependencies.php';
+$composerDepsPath = __DIR__ . '/vendor/ksfraser/ksf-common-db/src/Utils/ComposerDependencies.php';
 if (file_exists($composerDepsPath)) {
     require_once $composerDepsPath;
     \ksfraser\FrontAccounting\Common\Utils\ComposerDependencies::ensure(__DIR__);
