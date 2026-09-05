@@ -92,6 +92,28 @@ Each table gets a `{table}_db.inc` gateway exposing `write_{table}()` /
   PHP 8+ transitive deps breaks a PHP 7.x container) — pin
   `config.platform.php` to the container's PHP where needed.
 
+### ComposerDependencies — self-installing vendor on activation
+
+Each module bundles `ComposerDependencies.php` in its **root directory** (copied from
+`ksf_FA_Common/src/Utils/ComposerDependencies.php`). This solves the chicken-and-egg
+problem: vendor/ doesn't exist until composer runs, but we need to run composer to
+create vendor/.
+
+```php
+// hooks.php — top of file, BEFORE any other requires
+require_once __DIR__ . '/ComposerDependencies.php';
+\ksfraser\FrontAccounting\Common\Utils\ComposerDependencies::ensure(__DIR__);
+
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+}
+```
+
+`ComposerDependencies::ensure($moduleDir)` checks if `vendor/autoload.php` exists. If
+not, it runs `composer install --no-interaction --prefer-dist` in `$moduleDir`. FA
+calls `install_extension()` before activation completes, so vendor/ is ready when
+other hook methods run.
+
 ## 8. FA module naming / security constants
 
 - Hooks class: `hooks_ksf_FA_<ModuleName>`.
@@ -147,6 +169,22 @@ output.
   release/build in a separate field; the FA-compat major is what FA checks.
 - `install.sql` schema: hardcoded `0_` prefix; do not use `@TB_PREF@`/`{TB_PREF}`;
   probe existing tables with the bare table name.
+- **Deactivation**: use `sql/uninstall.sql` (also hardcoded `0_` prefix), NOT manual
+  `db_query()`. In `deactivate_extension()`, read the file and call `run_db_import()`.
+  The SQL runner replaces `0_` with the actual company prefix automatically.
+
+  ```php
+  function deactivate_extension($company, $force = false)
+  {
+      $uninstallFile = __DIR__ . '/sql/uninstall.sql';
+      if (file_exists($uninstallFile)) {
+          $sql = file_get_contents($uninstallFile);
+          run_db_import($sql, $company);
+      }
+      remove_security_section(SS_ksf_FA_ModuleName);
+      return parent::deactivate_extension($company, $force);
+  }
+  ```
 - Cross-module/owned classes live in a Packagist package, not a module dir.
   A module must never gate class availability on another module's activation.
 
