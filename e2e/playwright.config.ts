@@ -1,0 +1,13 @@
+{
+    "name": "ksf-fa-inventory-e2e",
+    "version": "1.0.0",
+    "description": "E2E tests for KSF FA Inventory modules",
+    "scripts": {
+        "test": "playwright test",
+        "test:headed": "playwright test --headed",
+        "test:ui": "playwright test --ui"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.40.0"
+    }
+}
