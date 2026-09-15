@@ -17,7 +17,7 @@ class hooks_ksf_FA_StockTurnover extends hooks
     function install_extension($check_only=true)
     {
         if (!$check_only) {
-            \ksfraser\FrontAccounting\Common\Utils\ComposerDependencies::ensure(__DIR__);
+            \ksfraser\FrontAccounting\StockTurnover\Utils\ComposerDependencies::ensure(__DIR__);
         }
         return true;
     }
