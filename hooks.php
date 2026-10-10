@@ -93,7 +93,7 @@ class hooks_ksf_FA_StockTurnover extends hooks
         }
     }
 
-    function db_postwrite($cart, $trans_type)
+    function db_postwrite(&$cart, $trans_type)
     {
         if (!in_array($trans_type, [ST_SALESINVOICE, ST_CUSTDELIVERY, ST_CREDIT, ST_ADJUSTMENT])) {
             return;
